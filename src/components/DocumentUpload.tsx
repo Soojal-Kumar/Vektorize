@@ -13,7 +13,8 @@ export default function DocumentUpload({ onFileProcessed }: DocumentUploadProps)
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const processFile = async (file: File) => {
+  // FIX #2: Wrap processFile in useCallback so it has a stable identity
+  const processFile = useCallback(async (file: File) => {
     setIsLoading(true);
     setError(null);
 
@@ -41,13 +42,17 @@ export default function DocumentUpload({ onFileProcessed }: DocumentUploadProps)
       
       onFileProcessed(file.name, content);
 
-    } catch (err: any) {
+    } catch (err) { // FIX #1: Handle the error type safely
       console.error('Error processing file:', err);
-      setError(err.message || 'An unknown error occurred.');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred.');
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [onFileProcessed]); // Add its dependency
 
   const handleDragEvents = (e: React.DragEvent, dragging: boolean) => {
     e.preventDefault();
@@ -55,21 +60,22 @@ export default function DocumentUpload({ onFileProcessed }: DocumentUploadProps)
     setIsDragging(dragging);
   };
 
+  // FIX #2 (continued): Add `processFile` to the dependency array
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     handleDragEvents(e, false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       processFile(e.dataTransfer.files[0]);
     }
-  }, []);
+  }, [processFile]); // Dependency added here
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      processFile(e.target.files[0]);
+      await processFile(e.target.files[0]);
     }
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }
-  };
+  }, [processFile]); // Dependency added here
 
   return (
     <div className="space-y-4">
