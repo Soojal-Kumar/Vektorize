@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, User, Bot, Sparkles, HelpCircle } from 'lucide-react';
 import ContextModal from './ContextModal';
 import { AppDocument } from '@/app/page';
+import * as natural from 'natural';
 
 interface Message {
   id: string;
@@ -25,9 +26,7 @@ export default function ChatInterface({ documents }: ChatInterfaceProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedContext, setSelectedContext] = useState<string | null>(null);
 
-  useEffect(() => {
-    setMessages([]);
-  }, [documents]);
+  useEffect(() => { setMessages([]); }, [documents]);
 
   const openContextModal = (context: string) => {
     setSelectedContext(context);
@@ -44,33 +43,63 @@ export default function ChatInterface({ documents }: ChatInterfaceProps) {
     }
   }, [input]);
 
+  const documentChunks = useCallback(() => {
+    if (documents.length === 0) return [];
+    const combinedContent = documents.map(doc => doc.content).join('\n\n');
+    return combinedContent.split(/\n\s*\n/).filter(chunk => chunk.trim().length > 10);
+  }, [documents]);
+
   const sendQuery = async (question: string) => {
     if (!question.trim() || documents.length === 0 || isLoading) return;
     setIsLoading(true);
 
-    const combinedContent = documents.map(doc => `--- START OF ${doc.name} ---\n${doc.content}\n--- END OF ${doc.name} ---`).join('\n\n');
-    const chunks = combinedContent.split('\n').filter(chunk => chunk.trim() !== '');
-    const questionKeywords = question.toLowerCase().split(/\s+/);
-    const relevantChunks = chunks.filter(chunk => questionKeywords.some(keyword => chunk.toLowerCase().includes(keyword)));
-    let context = relevantChunks.join('\n\n');
-    if (relevantChunks.length === 0) { context = combinedContent; }
-    
-    const userMessage: Message = { id: Date.now().toString(), content: question, role: 'user', context: context };
+    const userMessage: Message = { id: Date.now().toString(), content: question, role: 'user' };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInput('');
 
-
     try {
+      const chunks = documentChunks();
+      if (chunks.length === 0) throw new Error("No document content available to search.");
+
+      const tfidf = new natural.TfIdf();
+      chunks.forEach(chunk => {
+        tfidf.addDocument(chunk);
+      });
+
+      const topN = 3;
+      const chunkScores: { index: number; score: number }[] = [];
+
+      tfidf.tfidfs(question, (index, score) => {
+        chunkScores.push({ index, score });
+      });
+      
+      const relevantChunks = chunkScores
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, topN)
+        .map(item => chunks[item.index]);
+
+      let context = relevantChunks.join('\n\n---\n\n');
+      
+      if (context.trim() === "") {
+        const questionKeywords = question.toLowerCase().split(/\s+/);
+        const keywordChunks = chunks.filter(chunk => 
+            questionKeywords.some(keyword => chunk.toLowerCase().includes(keyword))
+        ).slice(0, topN);
+        
+        context = keywordChunks.join('\n\n---\n\n');
+
+        if (context.trim() === "") {
+            context = chunks.slice(0, 2).join('\n\n---\n\n');
+        }
+      }
+      
+      userMessage.context = context;
+
       const historyToInclude = newMessages.slice(-6, -1);
-      const formattedHistory = historyToInclude.map(msg => 
-        `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
-      ).join('\n');
-
-      // ===================================================================
-      // START OF THE "FEW-SHOT" PROMPT
-      // ===================================================================
-
+      const formattedHistory = historyToInclude.map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`).join('\n');
+      
       const personaAndRules = `You are Vektorize, a helpful AI assistant. You have two modes of operation:
 
       1.  **Conversational Mode:** For simple greetings or questions about yourself (e.g., "hello", "who are you?", "hi"). In this mode, be friendly and brief.
@@ -113,6 +142,7 @@ export default function ChatInterface({ documents }: ChatInterfaceProps) {
       USER QUESTION: ${question}
 
       ASSISTANT ANSWER:`;
+
       const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }) });
       if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
       const data = await res.json();
