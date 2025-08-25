@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 
+  ======================================================================
+  DESIGN SYSTEM & THEME
+  This is the v4 equivalent of tailwind.config.ts theme customization.
+  ======================================================================
+*/
+@theme {
+  /* Colors */
+  --color-bg-base: #0D0D0D;       /* Near Black */
+  --color-bg-muted: #171717;      /* Charcoal Gray for panels */
+  --color-border: #262626;         /* Subtle borders */
+  --color-text-primary: #F5F5F5;   /* Bright, clean text */
+  --color-text-muted: #A3A3A3;     /* Softer gray for secondary text */
+  --color-accent: #3873F6;         /* Electric Blue for focus and interaction */
+  --color-accent-foreground: #FFFFFF; /* White text for on-accent elements */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 
+  ======================================================================
+  BASE STYLES
+  Applies our dark theme and base font styles to the whole app.
+  ======================================================================
+*/
+@layer base {
+  body {
+    @apply bg-bg-base text-text-primary antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* 
+  ======================================================================
+  CUSTOM UTILITIES & ANIMATIONS
+  This is where we replicate our plugins using pure CSS.
+  ======================================================================
+*/
+@layer utilities {
+  /* Scrollbar Hiding Utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+
+  /* Fade-in and Zoom-in Animation */
+  .animate-in {
+    animation-name: fadeIn, zoomIn;
+    animation-duration: 150ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes zoomIn {
+    from { transform: scale(.95); }
+    to { transform: scale(1); }
+  }
 }
