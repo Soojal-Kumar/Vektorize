@@ -1,6 +1,6 @@
 # Vektorize - A Full-Stack RAG Playground
 
-**Live Demo:** [**vektorizer.vercel.app**](https://[vektorizer.vercel.app])
+**Live Demo:** [**vektorizer.vercel.app**](https://vektorizer.vercel.app)
 
 ![Vektorize Demo GIF](https://raw.githubusercontent.com/[YOUR-GITHUB-REPO-LINK]/main/public/demo.gif)
 
