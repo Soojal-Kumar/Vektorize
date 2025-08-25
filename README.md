@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vektorize - A Full-Stack RAG Playground
 
-## Getting Started
+**Live Demo:** [**vektorize.vercel.app**](https://[YOUR-VERCEL-URL])
 
-First, run the development server:
+![Vektorize Demo GIF](https://raw.githubusercontent.com/[YOUR-GITHUB-REPO-LINK]/main/public/demo.gif)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Vektorize is a complete, full-stack **Retrieval-Augmented Generation (RAG)** application built to explore the challenges and user experience of creating modern AI-powered chat interfaces. It allows users to upload their own documents (`.pdf` or `.txt`) to create a dynamic knowledge base, and then ask questions that are answered exclusively based on the provided content.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project was built as a hands-on deep-dive into the architecture of AI applications, with a specific focus on creating an intuitive and powerful frontend experience for a complex backend process.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Core Features
 
-## Learn More
+*   **Multi-Document Knowledge Base:** Upload multiple `.pdf` and `.txt` documents to build a session-specific knowledge base.
+*   **Secure Server-Side Processing:** All PDF text extraction is handled securely on the backend, ensuring robustness and scalability.
+*   **Conversational AI Chat:** Engage in multi-turn conversations with an AI that remembers the previous context of the chat, allowing for natural follow-up questions.
+*   **Factually Grounded Responses:** Utilizes advanced prompt engineering with the Google Gemini API to ensure the AI's answers are strictly derived from the content of the uploaded documents, preventing hallucinations.
+*   **Interactive RAG Debugging:** A standout feature where clicking on any user-sent prompt opens a modal, revealing the *exact* retrieved context that the AI used to formulate its response.
+*   **Polished, Modern UI:** A sleek, developer-tool-inspired dark mode interface built from scratch with a focus on a clean, intuitive, and responsive user experience.
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+*   **Framework:** Next.js (App Router)
+*   **Language:** TypeScript
+*   **Styling:** Tailwind CSS (v4 CSS-first approach)
+*   **AI:** Google Gemini API
+*   **Backend:** Next.js API Routes
+*   **Deployment:** Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## How to Run Locally
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/[YOUR-GITHUB-REPO-LINK]
+    cd vektorize
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Set up your environment variables:**
+    Create a file named `.env.local` in the root of the project and add your Google Gemini API key:
+    ```
+    GOOGLE_AI_API_KEY=your_api_key_here
+    ```
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
