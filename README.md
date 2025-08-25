@@ -34,11 +34,6 @@ This project was built as a hands-on deep-dive into the architecture of AI appli
 
 To focus on building a robust and polished end-to-end user experience, the retrieval part of the RAG pipeline is simulated using a simple but effective **keyword-based (lexical) search**. The application chunks the combined text of all uploaded documents and filters those chunks based on keywords from the user's query.
 
-This was a deliberate trade-off to prove out the full application architecture. The clear next step for a production system would be to implement true **semantic search**. This would involve:
-1.  Generating vector embeddings for each document chunk on upload (using a model like Gemini's `text-embedding-004`).
-2.  Storing these vectors in a specialized vector database (e.g., Pinecone, Supabase pgvector).
-3.  Querying this database to find the most semantically similar chunks to the user's question.
-
 ### 2. Secure, Server-Side Logic
 
 All sensitive operations are handled by Next.js API Routes. This includes:
